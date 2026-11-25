@@ -1,0 +1,23 @@
+{
+  "source": "https://revendor.app/fr/vinted-sales-barometer",
+  "source_note": "Baromètre Revendor : 50 087 ventes Vinted réelles sur 12 mois (513 comptes, surtout revendeurs fripe/vintage en France). Prix payé au vendeur, article seul, hors frais acheteur. Fourchette = quart le moins cher au quart le plus cher. Relevé le 25/11/2026.",
+  "brands": [
+    {"brand": "Ralph Lauren", "keys": ["ralph lauren", "ralph", "lauren"], "median": 23.20, "low": 15.00, "high": 32.80, "sales": 1665},
+    {"brand": "Nike", "keys": ["nike"], "median": 15.00, "low": 10.00, "high": 29.00, "sales": 1405},
+    {"brand": "adidas", "keys": ["adidas"], "median": 20.00, "low": 11.21, "high": 32.00, "sales": 1362},
+    {"brand": "Levi's", "keys": ["levi's", "levis", "levi’s", "levi"], "median": 17.00, "low": 12.00, "high": 25.00, "sales": 1353},
+    {"brand": "Tommy Hilfiger", "keys": ["tommy hilfiger", "tommy"], "median": 18.00, "low": 12.00, "high": 27.00, "sales": 1174},
+    {"brand": "Lacoste", "keys": ["lacoste", "croco"], "median": 20.00, "low": 14.00, "high": 28.00, "sales": 715},
+    {"brand": "Carhartt", "keys": ["carhartt"], "median": 27.00, "low": 15.00, "high": 50.00, "sales": 441},
+    {"brand": "The North Face", "keys": ["the north face", "north face", "tnf"], "median": 22.00, "low": 16.05, "high": 35.00, "sales": 414},
+    {"brand": "Columbia", "keys": ["columbia", "colombia"], "median": 17.00, "low": 12.50, "high": 25.00, "sales": 369},
+    {"brand": "Patagonia", "keys": ["patagonia"], "median": 38.35, "low": 30.00, "high": 49.00, "sales": 356},
+    {"brand": "K-Way", "keys": ["k-way", "kway"], "median": 63.00, "low": 50.00, "high": 81.50, "sales": 203},
+    {"brand": "Burberry", "keys": ["burberry"], "median": 33.00, "low": 25.00, "high": 50.00, "sales": 151},
+    {"brand": "Dickies", "keys": ["dickies"], "median": 15.00, "low": 10.00, "high": 19.00, "sales": 141},
+    {"brand": "Polo Ralph Lauren", "keys": [], "median": 25.00, "low": 16.00, "high": 39.00, "sales": 195},
+    {"brand": "Uniqlo", "keys": [], "median": 18.50, "low": 10.00, "high": 38.75, "sales": 254},
+    {"brand": "Zara (à éviter)", "keys": [], "median": 9.50, "low": 5.00, "high": 16.50, "sales": 443},
+    {"brand": "H&M (à éviter)", "keys": [], "median": 6.00, "low": 4.00, "high": 9.99, "sales": 156}
+  ]
+}
