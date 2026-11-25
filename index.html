@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07060d">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex">
+<meta name="description" content="Sourcing Vinted : marques qui se vendent, offres d'achat, marges, plan 100 €, suivi de stock et avis photo.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sourcing">
+<title>Sourcing — Vinted</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+
+<header class="top">
+  <div class="brand">
+    <img class="logo" src="icons/icon-192.png" width="44" height="44" alt="">
+    <div>
+      <h1>SOURC<span>ING</span></h1>
+      <p class="sub">Vinted · achat-revente</p>
+    </div>
+  </div>
+  <div class="pills">
+    <span class="pill mode" id="budgetPill">Budget 100 €</span>
+    <span class="pill" id="livePill"><i class="dot"></i><b id="liveTxt">…</b></span>
+  </div>
+</header>
+
+<div id="installBar" class="install" hidden>
+  <span>Installe l'appli sur l'écran d'accueil pour l'ouvrir comme Vortex.</span>
+  <button type="button" id="installBtn">Installer</button>
+  <button type="button" id="installHelp" class="ghost">Comment ?</button>
+  <button type="button" id="installX" class="ghost" aria-label="Fermer">×</button>
+</div>
+
+<main>
+  <!-- ===== MARQUES ===== -->
+  <section class="tab active" id="t-marques" data-tab="marques">
+    <div class="hero card glow">
+      <div class="hero-l">
+        <label>Budget de départ</label>
+        <div class="big" id="hBudget">100 €</div>
+        <div class="delta" id="hOffers">—</div>
+      </div>
+      <div class="hero-r">
+        <div><label>Dans le budget</label><b id="hInBudget">—</b></div>
+        <div><label>Marge nette &gt; 0</label><b id="hNetPos">—</b></div>
+        <div><label>Données</label><b id="hDate">—</b></div>
+      </div>
+      <p class="note">Prix de revente : médiane payée au vendeur, article seul, d'après le baromètre public Revendor (50 087 ventes Vinted sur 12 mois, 513 comptes). <a href="https://revendor.app/fr/vinted-sales-barometer" target="_blank" rel="noopener">Source</a>. Aucune donnée n'est lue automatiquement sur Vinted ou Leboncoin.</p>
+    </div>
+    <h3 class="sec">Marques qui partent le mieux <small>classées par volume de ventes</small></h3>
+    <div id="brands" class="list"></div>
+    <p class="note">Zara et H&amp;M se vendent, mais trop bon marché : la marge disparaît après emballage et URSSAF. Priorité avec 100 € : Ralph Lauren, Carhartt, The North Face, Patagonia, Lacoste, Levi's — achetés en friperie, Emmaüs ou vide-grenier, pas en lot de gros.</p>
+  </section>
+
+  <!-- ===== OFFRES ===== -->
+  <section class="tab" id="t-offres" data-tab="offres">
+    <div class="card">
+      <div class="card-h"><h2>Filtres</h2><span class="muted" id="offCount"></span></div>
+      <div class="filters">
+        <label class="f">Budget
+          <select id="fBudget">
+            <option value="100" selected>≤ 100 €</option>
+            <option value="150">≤ 150 €</option>
+            <option value="300">≤ 300 €</option>
+            <option value="0">Tous les prix</option>
+          </select>
+        </label>
+        <label class="f">Source
+          <select id="fSource"><option value="">Toutes</option></select>
+        </label>
+        <label class="f">Marque
+          <select id="fBrand"><option value="">Toutes</option></select>
+        </label>
+        <label class="f">Tri
+          <select id="fSort">
+            <option value="score">Score</option>
+            <option value="net">Marge / pièce</option>
+            <option value="total">Prix d'achat</option>
+            <option value="sales">Vitesse marque</option>
+          </select>
+        </label>
+      </div>
+      <div class="seg wide" id="fFlags">
+        <button type="button" data-flag="net" class="on">Marge &gt; 0</button>
+        <button type="button" data-flag="third">Règle du 1/3</button>
+        <button type="button" data-flag="all">Tout voir</button>
+      </div>
+    </div>
+    <div id="offers" class="list"></div>
+    <div class="card">
+      <div class="card-h"><h2>Recherches à ouvrir à la main</h2></div>
+      <p class="note">Vinted, Leboncoin et eBay interdisent le balayage automatique. Ouvre ces liens, ou enregistre-les comme alerte dans l'appli.</p>
+      <div id="manuals" class="list compact"></div>
+    </div>
+  </section>
+
+  <!-- ===== PLAN 100 € ===== -->
+  <section class="tab" id="t-plan" data-tab="plan">
+    <div class="hero card glow">
+      <div class="hero-l">
+        <label>Objectif du 1<sup>er</sup> mois</label>
+        <div class="big">80–150 €</div>
+        <div class="delta muted">net, à réinvestir en entier</div>
+      </div>
+      <div class="hero-r">
+        <div><label>Pièces à viser</label><b>~ 25 à 4 €</b></div>
+        <div><label>Vers 2 000 €/mois</label><b>9 à 12 mois</b></div>
+        <div><label>Lots de gros</label><b>à partir de ~ 300 €</b></div>
+      </div>
+    </div>
+
+    <h3 class="sec">Comment démarrer avec 100 €</h3>
+    <div class="steps">
+      <article class="card step"><span class="n">1</span><div><h4>N'achète pas de lots en ligne pour l'instant</h4><p>Presque tous les lots de grossistes dépassent 100 €, ou laissent trop peu de marge une fois le port, l'emballage, 10 % d'invendus et l'URSSAF déduits. Les 100 € vont en friperie, dépôt Emmaüs et vide-grenier, pièce par pièce.</p></div></article>
+      <article class="card step"><span class="n">2</span><div><h4>Cible 25 pièces de marque à 4 € en moyenne</h4><p>Priorité : Ralph Lauren, Carhartt, The North Face, Patagonia, Lacoste, Levi's, en bon état, homme, tailles courantes (M–XL, 40–44). Prix d'achat ≤ un tiers du prix de revente médian (onglet Marques). Exemple : un polo Ralph Lauren à 7 € pour une revente médiane à 23 €, c'est bon. À 12 €, tu passes.</p></div></article>
+      <article class="card step"><span class="n">3</span><div><h4>Avant d'acheter, ouvre l'onglet Photo</h4><p>Prends la pièce en photo, choisis la marque, le type, l'état et le prix demandé : tu as tout de suite achète ou passe, avec la marge. Pour un avis plus fin (défauts, typicité, prix affiché), partage la photo dans le chat.</p></div></article>
+      <article class="card step"><span class="n">4</span><div><h4>Réinvestis tout le premier mois</h4><p>Compte 80 à 150 € nets si tu vends bien. On ne se verse rien : on reconstitue le stock. Vers 300 € de côté, on peut commencer à regarder des petits lots de grossistes (onglet Offres, filtre ≤ 300 €, règle du 1/3 cochée).</p></div></article>
+      <article class="card step"><span class="n">5</span><div><h4>Cadre légal, à faire toi-même</h4><p>Micro-entreprise vente de marchandises (cotisations d'environ 13,4 % du chiffre d'affaires), déclaration en préfecture (CERFA 11733) et registre des objets mobiliers si tu achètes d'occasion pour revendre. Rien n'est créé à ta place, et aucun compte n'est ouvert pour toi.</p></div></article>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Ordre de grandeur jusqu'à 2 000 €</h2></div>
+      <div class="bars" id="planBars"></div>
+      <p class="note">Hypothèses : ~11 € nets sur une vente à 25 €, 15–20 h par semaine à terme, 9 à 12 mois pour viser 2 000 € nets/mois (environ 180 ventes), plus long pour 3 000 €. Ce n'est pas un revenu automatique 24 h/24 : les ventes arrivent tous les jours une fois le catalogue rempli, mais le travail (sourcing, photos, envois) reste le tien.</p>
+    </div>
+  </section>
+
+  <!-- ===== CALCULATEUR ===== -->
+  <section class="tab" id="t-calcul" data-tab="calcul">
+    <div class="card">
+      <div class="card-h"><h2>Calculateur de marge</h2></div>
+      <p class="note">Même formule que le reste du système. Sur Vinted, l'acheteur paie les frais Vinted et le port : tu n'as pas de commission.</p>
+      <div class="form-grid">
+        <label class="f">Prix de revente attendu (€)
+          <input type="number" id="cResale" inputmode="decimal" min="0" step="0.01" value="25">
+        </label>
+        <label class="f">Prix d'achat, port inclus (€)
+          <input type="number" id="cCost" inputmode="decimal" min="0" step="0.01" value="6.5">
+        </label>
+        <label class="f">Nombre de pièces
+          <input type="number" id="cPieces" inputmode="numeric" min="1" step="1" value="1">
+        </label>
+        <label class="f check"><input type="checkbox" id="cLot"> C'est un lot : répartir 10 % d'invendus sur les autres pièces</label>
+      </div>
+      <div id="cOut" class="verdict"></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Comment c'est calculé</h2></div>
+      <div class="kv" id="cKv"></div>
+      <p class="note" id="cNotes"></p>
+    </div>
+  </section>
+
+  <!-- ===== STOCK ===== -->
+  <section class="tab" id="t-stock" data-tab="stock">
+    <div class="hero card glow">
+      <div class="hero-l">
+        <label>Bénéfice cumulé (vendu)</label>
+        <div class="big" id="sProfit">0,00 €</div>
+        <div class="delta" id="sDelta">aucune vente pour l'instant</div>
+      </div>
+      <div class="hero-r">
+        <div><label>En stock</label><b id="sStock">0</b></div>
+        <div><label>En ligne</label><b id="sLive">0</b></div>
+        <div><label>Vendus</label><b id="sSold">0</b></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Ajouter un achat</h2></div>
+      <form id="stockForm" class="form-grid" autocomplete="on">
+        <label class="f">Date d'achat <input type="date" id="sDate" required></label>
+        <label class="f">Source <input type="text" id="sSource" placeholder="Friperie, Emmaüs, vide-grenier…"></label>
+        <label class="f">Marque <input type="text" id="sBrand" list="brandList" required></label>
+        <label class="f">Article <input type="text" id="sItem" placeholder="Polo, taille, couleur…" required></label>
+        <label class="f">Taille <input type="text" id="sSize" placeholder="M, 42…"></label>
+        <label class="f">Prix d'achat (€) <input type="number" id="sPrice" inputmode="decimal" min="0" step="0.01" required></label>
+        <label class="f">Port d'achat (€) <input type="number" id="sShip" inputmode="decimal" min="0" step="0.01" value="0"></label>
+        <div class="form-actions"><button type="submit" class="btn">Enregistrer</button></div>
+      </form>
+    </div>
+    <div class="seg wide" id="sFilter">
+      <button type="button" data-st="all" class="on">Tout</button>
+      <button type="button" data-st="stock">En stock</button>
+      <button type="button" data-st="en ligne">En ligne</button>
+      <button type="button" data-st="vendu">Vendus</button>
+    </div>
+    <div id="stockList" class="list"></div>
+    <div class="row-btns">
+      <button type="button" class="btn ghost" id="sExport">Exporter le CSV</button>
+      <label class="btn ghost file">Importer un CSV<input type="file" id="sImport" accept=".csv,text/csv" hidden></label>
+    </div>
+    <p class="note">Le suivi reste dans ce téléphone ou cet ordinateur (mémoire du navigateur). Il n'est envoyé nulle part. Exporte le CSV pour en garder une copie, ou pour le rouvrir ici.</p>
+  </section>
+
+  <!-- ===== PHOTO ===== -->
+  <section class="tab" id="t-photo" data-tab="photo">
+    <div class="card">
+      <div class="card-h"><h2>Avis achète ou passe</h2></div>
+      <p class="note">Prends la pièce en photo, indique la marque, le type, l'état et le prix demandé. Le verdict utilise les prix de revente Revendor et la même formule de marge — sans envoyer la photo à un service. Pour un avis détaillé (étiquette, défauts, côte exacte), partage-la ensuite dans le chat.</p>
+      <label class="shot" id="shotBox">
+        <input type="file" id="pFile" accept="image/*" capture="environment" hidden>
+        <div id="pEmpty" class="shot-empty">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <b>Prendre une photo</b>
+          <span>ou en choisir une dans la galerie</span>
+        </div>
+        <img id="pPreview" alt="Aperçu de la pièce" hidden>
+      </label>
+      <div class="form-grid">
+        <label class="f">Marque
+          <input type="text" id="pBrand" list="brandList" placeholder="Ralph Lauren, Carhartt…">
+        </label>
+        <label class="f">Type
+          <select id="pType">
+            <option value="median">Polo, chemise, pull, jean…</option>
+            <option value="low">T-shirt, short, accessoire</option>
+            <option value="high">Veste, polaire, doudoune</option>
+          </select>
+        </label>
+        <label class="f">État
+          <select id="pCond">
+            <option value="1">Très bon / bon état</option>
+            <option value="0.7">Défauts visibles (grade B)</option>
+          </select>
+        </label>
+        <label class="f">Prix demandé (€)
+          <input type="number" id="pPrice" inputmode="decimal" min="0" step="0.01" placeholder="ex. 6">
+        </label>
+      </div>
+      <div id="pOut" class="verdict"></div>
+      <div class="row-btns">
+        <button type="button" class="btn" id="pShare" disabled>Partager la photo pour un avis détaillé</button>
+      </div>
+      <p class="note" id="pShareHelp">Le bouton ouvre le menu de partage de ton téléphone (Messages, WhatsApp, Fichiers…). Envoie ensuite la photo dans notre chat pour que je la regarde.</p>
+    </div>
+  </section>
+</main>
+
+<datalist id="brandList"></datalist>
+
+<nav class="tabs" id="tabs">
+  <button data-t="marques" class="on"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 6.6H21l-5.4 4 2.1 6.4L12 16.8 6.3 20l2.1-6.4L3 9.6h6.8z"/></svg><span>Marques</span></button>
+  <button data-t="offres"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Offres</span></button>
+  <button data-t="plan"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 10h8M8 14h5"/></svg><span>Plan</span></button>
+  <button data-t="calcul"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h3M13 12h3M8 16h3M13 16h3"/></svg><span>Calcul</span></button>
+  <button data-t="stock"><svg viewBox="0 0 24 24"><path d="M4 7h16l-1.5 13h-13z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg><span>Stock</span></button>
+  <button data-t="photo"><svg viewBox="0 0 24 24"><path d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/><circle cx="12" cy="13" r="4"/></svg><span>Photo</span></button>
+</nav>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-in">
+    <button class="x" id="sheetX" aria-label="Fermer">×</button>
+    <div id="sheetBody"></div>
+  </div>
+</div>
+
+<script src="app.js" defer></script>
+</body>
+</html>
