@@ -189,13 +189,24 @@ function filteredOffers() {
   if (brand) list = list.filter(o => o.brands.includes(brand));
   if (gender === "femme") list = list.filter(o => o.gender === "femme" || o.gender === "mixte");
   if (gender === "homme") list = list.filter(o => o.gender === "homme" || o.gender === "mixte");
-  list = list.filter(o => o.margin.rule_one_third_ok && o.margin.net >= minNet());
+  const q = DATA?.offer_quality || {};
+  const minN = Number.isFinite(Number(q.min_net_per_piece)) ? Number(q.min_net_per_piece) : minNet();
+  const minC = Number.isFinite(Number(q.min_coefficient)) ? Number(q.min_coefficient) : 2;
+  list = list.filter(o => {
+    const m = o.margin || {};
+    const coeff = m.coefficient || (m.cost_per_piece ? m.resale / m.cost_per_piece : 0);
+    return m.net >= minN && coeff >= minC;
+  });
+  if (flagMode === "season") list = list.filter(o => o.season === "in");
   if (flagMode === "net") list = list.filter(o => o.margin.net > 0);
-  if (flagMode === "third") list = list.filter(o => o.margin.rule_one_third_ok);
+  if (flagMode === "top" || flagMode === "third") list = list.filter(o => o.quality_level === "top" || o.margin.rule_one_third_ok);
   list.sort((a, b) => {
     if (sort === "net") return b.margin.net - a.margin.net;
     if (sort === "total") return a.total_price - b.total_price;
     if (sort === "sales") return (b.brand_sales || 0) - (a.brand_sales || 0);
+    const sa = {in:0, mid:1, off:2}[a.season] ?? 1;
+    const sb = {in:0, mid:1, off:2}[b.season] ?? 1;
+    if (sa !== sb) return sa - sb;
     return prioritySort(a, b);
   });
   if (!gender) list = balanceGender(list);
@@ -223,8 +234,10 @@ function renderOffers() {
     const tags = [
       `<span class="tag ${gCls}">${g}</span>`,
       o.is_new ? `<span class="tag new">Nouveau</span>` : "",
+      o.season === "in" ? `<span class="tag saison">de saison</span>` : (o.season === "off" ? `<span class="tag off">hors saison</span>` : ""),
+      o.quality_level ? `<span class="tag ${o.quality_level}">${o.quality_level}</span>` : "",
       `<span class="tag">score ${o.score}</span>`,
-      `<span class="tag ok">1/3 ok</span>`,
+      o.margin.rule_one_third_ok ? `<span class="tag ok">1/3 ok</span>` : "",
       o.priority_brand ? "" : `<span class="tag">hors liste</span>`,
       o.margin_caution ? `<span class="tag warn">à vérifier</span>` : "",
       o.pieces_estimated ? `<span class="tag warn">pièces estimées</span>` : "",
@@ -263,7 +276,10 @@ function openOffer(o) {
       <span>Coût effectif (invendus)</span><b>${eur0(m.effective_cost)}</b>
       <span>Marge nette / pièce</span><b class="${m.net > 0 ? "pos" : "neg"}">${eur0(m.net)} (${m.net_pct} %)</b>
       <span>Marge nette du lot</span><b class="${o.net_total > 0 ? "pos" : "neg"}">${eur0(o.net_total)}</b>
+      <span>Coefficient revente/achat</span><b>×${(m.coefficient || (m.cost_per_piece ? m.resale / m.cost_per_piece : 0)).toFixed ? (m.coefficient || (m.resale / m.cost_per_piece)).toFixed(2) : m.coefficient}</b>
       <span>Règle du 1/3</span><b>${m.rule_one_third_ok ? "oui" : "non"} (${Math.round(m.cost_ratio * 100)} %)</b>
+      <span>Niveau</span><b>${o.quality_level || "—"}</b>
+      <span>Saison</span><b>${o.season === "in" ? "de saison" : o.season === "off" ? "hors saison" : "toute année"}</b>
       <span>Score</span><b>${o.score} / 100</b>
     </div>
     ${o.margin_caution ? `<p class="note">${esc(o.margin_caution)}</p>` : ""}

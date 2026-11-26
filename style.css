@@ -172,6 +172,11 @@ select option{background:#12101c;color:var(--ink)}
 .tag.homme{background:rgba(62,224,240,.12);color:var(--cyan)}
 .tag.mixte{background:rgba(155,123,255,.14);color:var(--violet)}
 .tag.new{background:rgba(255,209,102,.18);color:var(--gold);letter-spacing:.04em}
+.tag.saison{background:rgba(78,240,184,.16);color:var(--mint)}
+.tag.top{background:rgba(78,240,184,.2);color:var(--mint);font-weight:700}
+.tag.bon{background:rgba(62,224,240,.14);color:var(--cyan)}
+.tag.correct{background:rgba(155,123,255,.14);color:var(--violet)}
+.tag.off{background:rgba(255,107,139,.14);color:var(--coral)}
 .card.weekend{background:rgba(255,138,76,.12);border-color:rgba(255,138,76,.35)}
 .card.weekend h2{color:var(--gold)}
 .card.weekend .bigish{font:800 22px/1.1 var(--mono);margin:4px 0 8px}

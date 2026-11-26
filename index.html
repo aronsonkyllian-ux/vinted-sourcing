@@ -71,16 +71,18 @@
         </label>
         <label class="f">Tri
           <select id="fSort">
-            <option value="score" selected>Marge (priorité marques)</option>
+            <option value="score" selected>Saison puis marge</option>
             <option value="net">Marge / pièce seule</option>
             <option value="total">Prix d'achat</option>
             <option value="sales">Vitesse marque</option>
           </select>
         </label>
       </div>
-      <p class="note" id="qualityNote">Toutes les offres listées respectent la règle du 1/3 (achat + port ≤ un tiers de la revente, calculée sur la médiane de la marque) et une marge nette d'au moins 5 € par pièce. Elles sont triées d'abord par les marques du baromètre, puis par la marge nette et le ratio achat/revente.</p>
+      <p class="note" id="qualityNote">Les offres listées sont encore bénéficiaires après port, emballage, 10 % d'invendus et URSSAF : coefficient revente/achat d'au moins x2 et marge nette d'au moins 3 € par pièce. Le niveau « top » suit la règle du 1/3 (idéal des revendeurs). Elles sont triées d'abord par la saison (hiver : doudounes, manteaux, pulls, polaires), puis par les marques du baromètre et la marge. Les pièces clairement hors saison (shorts, maillots, coupe-vent légers en novembre) sont écartées.</p>
       <div class="seg wide" id="fFlags">
-        <button type="button" data-flag="net" class="on">Marge &gt; 0</button>
+        <button type="button" data-flag="season">De saison</button>
+        <button type="button" data-flag="net" class="on">Toutes (rentables)</button>
+        <button type="button" data-flag="top">Top (1/3)</button>
         <button type="button" data-flag="all">Tout voir</button>
       </div>
     </div>
