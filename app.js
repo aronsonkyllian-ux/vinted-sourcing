@@ -152,6 +152,7 @@ function balanceGender(list) {
   const m = list.filter(o => o.gender !== "femme" && o.gender !== "homme");
   if (!h.length) return f.length ? f.concat(m) : m;
   const takeF = f.length;
+  const allH = h;
   const takeH = takeF ? Math.min(h.length, Math.max(0, Math.round(takeF * hommeShare / femmeShare))) : h.length;
   const F = f.slice(0, takeF), H = h.slice(0, takeH);
   const stepF = Math.max(1, Math.round(femmeShare / Math.max(hommeShare, 0.01)));
@@ -161,7 +162,8 @@ function balanceGender(list) {
     for (let k = 0; k < stepF && i < F.length; k++) out.push(F[i++]);
     if (j < H.length) out.push(H[j++]);
   }
-  if (!m.length) return out;
+  const restH = allH.filter(o => !H.includes(o));
+  if (!m.length) return out.concat(restH);
   const mixteRe = /homme\s*(et|-|\/|,)\s*femme|femme\s*(et|-|\/|,)\s*homme|unisexe|unisex|\bmixte\b|homme\s*-\s*femme|femme\s*-\s*homme/i;
   const explicit = m.filter(o => mixteRe.test(o.title || ""));
   const other = m.filter(o => !mixteRe.test(o.title || ""));
@@ -174,7 +176,8 @@ function balanceGender(list) {
     mixed.push(o);
     if (mi < M.length && (k + 1) % stride === 0) mixed.push(M[mi++]);
   });
-  return mixed.concat(M.slice(mi));
+  const restM = m.filter(o => !M.includes(o));
+  return mixed.concat(M.slice(mi), restH, restM);
 }
 
 function filteredOffers() {

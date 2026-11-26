@@ -1,5 +1,5 @@
 /* Sourcing Vinted — coque hors ligne (cache d'abord), données en réseau d'abord. */
-const V = "sourcing-e73ac34fde";
+const V = "sourcing-e73ac34fdf";
 const SHELL = ["./", "index.html", "style.css", "app.js", "manifest.json",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png", "icons/favicon.png"];
 const SEEN_REQ = new Request("./__seen_alerts__");
