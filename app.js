@@ -75,7 +75,7 @@ function resaleFor(brandName, type, cond) {
       basis = "médiane / fourchette Revendor — marque peu rentable";
     }
   } else if (type === "high") {
-    base = b.high; basis = "haut de fourchette Revendor (vêtement d'extérieur)";
+    base = b.median; basis = "médiane Revendor (veste / doudoune : pas de statistique réelle par catégorie)";
   } else if (type === "low") {
     base = b.low; basis = "bas de fourchette Revendor (t-shirt / short / accessoire)";
   } else {
@@ -150,7 +150,7 @@ function balanceGender(list) {
   const f = list.filter(o => o.gender === "femme");
   const h = list.filter(o => o.gender === "homme");
   const m = list.filter(o => o.gender !== "femme" && o.gender !== "homme");
-  if (!f.length && !h.length) return m;
+  if (!h.length) return f.length ? f.concat(m) : m;
   const takeF = f.length;
   const takeH = takeF ? Math.min(h.length, Math.max(0, Math.round(takeF * hommeShare / femmeShare))) : h.length;
   const F = f.slice(0, takeF), H = h.slice(0, takeH);
@@ -226,6 +226,7 @@ function renderOffers() {
       `<span class="tag">score ${o.score}</span>`,
       `<span class="tag ok">1/3 ok</span>`,
       o.priority_brand ? "" : `<span class="tag">hors liste</span>`,
+      o.margin_caution ? `<span class="tag warn">à vérifier</span>` : "",
       o.pieces_estimated ? `<span class="tag warn">pièces estimées</span>` : "",
       /ESTIMATION/i.test(o.shipping_note || "") && o.shipping ? `<span class="tag warn">port estimé</span>` : ""
     ].join("");
@@ -265,6 +266,7 @@ function openOffer(o) {
       <span>Règle du 1/3</span><b>${m.rule_one_third_ok ? "oui" : "non"} (${Math.round(m.cost_ratio * 100)} %)</b>
       <span>Score</span><b>${o.score} / 100</b>
     </div>
+    ${o.margin_caution ? `<p class="note">${esc(o.margin_caution)}</p>` : ""}
     <a class="btn" href="${esc(o.url)}" target="_blank" rel="noopener">Voir l'offre</a>
     <p class="note">Vérifie le port et l'état sur le site avant d'acheter. Les mentions « estimation » ne sont pas un tarif officiel.</p>`;
   $("#sheet").hidden = false;
