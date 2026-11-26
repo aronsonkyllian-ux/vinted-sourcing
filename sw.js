@@ -1,5 +1,5 @@
 /* Sourcing Vinted — coque hors ligne (cache d'abord), données en réseau d'abord. */
-const V = "sourcing-e73ac34fdf";
+const V = "sourcing-e73ac34fe0";
 const SHELL = ["./", "index.html", "style.css", "app.js", "manifest.json",
   "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png", "icons/favicon.png"];
 const SEEN_REQ = new Request("./__seen_alerts__");
@@ -23,13 +23,14 @@ self.addEventListener("fetch", e => {
     );
     return;
   }
-  e.respondWith(caches.match(req, { ignoreSearch: true }).then(hit => {
-    const net = fetch(req).then(r => {
+  // Réseau d'abord pour la coque aussi : la dernière version s'affiche dès qu'il y a du réseau.
+  e.respondWith(
+    fetch(req, { cache: "no-cache" }).then(r => {
       if (r && r.ok) { const c = r.clone(); caches.open(V).then(x => x.put(req, c)); }
       return r;
-    }).catch(() => hit || (req.mode === "navigate" ? caches.match("index.html") : undefined));
-    return hit || net;
-  }));
+    }).catch(() => caches.match(req, { ignoreSearch: true })
+      .then(hit => hit || (req.mode === "navigate" ? caches.match("index.html") : undefined)))
+  );
 });
 
 self.addEventListener("notificationclick", e => {

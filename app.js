@@ -890,7 +890,14 @@ async function boot() {
   showTab($(`#t-${tab}`) ? tab : "offres");
 
   if ("serviceWorker" in navigator) {
-    try { await navigator.serviceWorker.register("sw.js"); } catch {}
+    try {
+      const reg = await navigator.serviceWorker.register("sw.js", { updateViaCache: "none" });
+      reg.update().catch(() => {});
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (reloaded) return; reloaded = true; location.reload();
+      });
+    } catch {}
   }
   showInstall();
   updateAlertBtn();
