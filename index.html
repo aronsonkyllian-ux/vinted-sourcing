@@ -31,6 +31,7 @@
   <div class="pills">
     <span class="pill mode" id="budgetPill">Budget 100 €</span>
     <span class="pill" id="livePill"><i class="dot"></i><b id="liveTxt">…</b></span>
+    <button type="button" class="pill alert-pill" id="alertBtn">Activer les alertes</button>
   </div>
 </header>
 
@@ -42,28 +43,8 @@
 </div>
 
 <main>
-  <!-- ===== MARQUES ===== -->
-  <section class="tab active" id="t-marques" data-tab="marques">
-    <div class="hero card glow">
-      <div class="hero-l">
-        <label>Budget de départ</label>
-        <div class="big" id="hBudget">100 €</div>
-        <div class="delta" id="hOffers">—</div>
-      </div>
-      <div class="hero-r">
-        <div><label>Dans le budget</label><b id="hInBudget">—</b></div>
-        <div><label>Marge nette &gt; 0</label><b id="hNetPos">—</b></div>
-        <div><label>Données</label><b id="hDate">—</b></div>
-      </div>
-      <p class="note">Prix de revente : médiane payée au vendeur, article seul, d'après le baromètre public Revendor (50 087 ventes Vinted sur 12 mois, 513 comptes). <a href="https://revendor.app/fr/vinted-sales-barometer" target="_blank" rel="noopener">Source</a>. Aucune donnée n'est lue automatiquement sur Vinted ou Leboncoin.</p>
-    </div>
-    <h3 class="sec">Marques qui partent le mieux <small>classées par volume de ventes</small></h3>
-    <div id="brands" class="list"></div>
-    <p class="note">Zara et H&amp;M se vendent, mais trop bon marché : la marge disparaît après emballage et URSSAF. Priorité avec 100 € : Ralph Lauren, Carhartt, The North Face, Patagonia, Lacoste, Levi's — achetés en friperie, Emmaüs ou vide-grenier, pas en lot de gros.</p>
-  </section>
-
   <!-- ===== OFFRES ===== -->
-  <section class="tab" id="t-offres" data-tab="offres">
+  <section class="tab active" id="t-offres" data-tab="offres">
     <div class="card">
       <div class="card-h"><h2>Filtres</h2><span class="muted" id="offCount"></span></div>
       <div class="filters">
@@ -80,6 +61,13 @@
         </label>
         <label class="f">Marque
           <select id="fBrand"><option value="">Toutes</option></select>
+        </label>
+        <label class="f">Genre
+          <select id="fGender">
+            <option value="" selected>Tous (80 % femme)</option>
+            <option value="femme">Femme</option>
+            <option value="homme">Homme</option>
+          </select>
         </label>
         <label class="f">Tri
           <select id="fSort">
@@ -104,6 +92,26 @@
     </div>
   </section>
 
+  <!-- ===== MARQUES ===== -->
+  <section class="tab" id="t-marques" data-tab="marques">
+    <div class="hero card glow">
+      <div class="hero-l">
+        <label>Budget de départ</label>
+        <div class="big" id="hBudget">100 €</div>
+        <div class="delta" id="hOffers">—</div>
+      </div>
+      <div class="hero-r">
+        <div><label>Dans le budget</label><b id="hInBudget">—</b></div>
+        <div><label>Marge nette &gt; 0</label><b id="hNetPos">—</b></div>
+        <div><label>Données</label><b id="hDate">—</b></div>
+      </div>
+      <p class="note">Prix de revente : médiane payée au vendeur, article seul, d'après le baromètre public Revendor (50 087 ventes Vinted sur 12 mois, 513 comptes). <a href="https://revendor.app/fr/vinted-sales-barometer" target="_blank" rel="noopener">Source</a>. Aucune donnée n'est lue automatiquement sur Vinted ou Leboncoin.</p>
+    </div>
+    <h3 class="sec">Marques qui partent le mieux <small>classées par volume de ventes</small></h3>
+    <div id="brands" class="list"></div>
+    <p class="note">Zara et H&amp;M se vendent, mais trop bon marché : la marge disparaît après emballage et URSSAF. Priorité avec 100 € : Ralph Lauren, Carhartt, The North Face, Patagonia, Lacoste, Levi's — achetés en friperie, Emmaüs ou vide-grenier, pas en lot de gros.</p>
+  </section>
+
   <!-- ===== PLAN 100 € ===== -->
   <section class="tab" id="t-plan" data-tab="plan">
     <div class="hero card glow">
@@ -122,7 +130,7 @@
     <h3 class="sec">Comment démarrer avec 100 €</h3>
     <div class="steps">
       <article class="card step"><span class="n">1</span><div><h4>N'achète pas de lots en ligne pour l'instant</h4><p>Presque tous les lots de grossistes dépassent 100 €, ou laissent trop peu de marge une fois le port, l'emballage, 10 % d'invendus et l'URSSAF déduits. Les 100 € vont en friperie, dépôt Emmaüs et vide-grenier, pièce par pièce.</p></div></article>
-      <article class="card step"><span class="n">2</span><div><h4>Cible 25 pièces de marque à 4 € en moyenne</h4><p>Priorité : Ralph Lauren, Carhartt, The North Face, Patagonia, Lacoste, Levi's, en bon état, homme, tailles courantes (M–XL, 40–44). Prix d'achat ≤ un tiers du prix de revente médian (onglet Marques). Exemple : un polo Ralph Lauren à 7 € pour une revente médiane à 23 €, c'est bon. À 12 €, tu passes.</p></div></article>
+      <article class="card step"><span class="n">2</span><div><h4>Cible 25 pièces de marque à 4 € en moyenne</h4><p>Priorité : Ralph Lauren, Carhartt, The North Face, Patagonia, Lacoste, Levi's, en bon état, homme ou femme, tailles courantes (M–XL, 40–44 / 36–42). Prix d'achat ≤ un tiers du prix de revente médian (onglet Marques). Exemple : un polo Ralph Lauren à 7 € pour une revente médiane à 23 €, c'est bon. À 12 €, tu passes.</p></div></article>
       <article class="card step"><span class="n">3</span><div><h4>Avant d'acheter, ouvre l'onglet Photo</h4><p>Prends la pièce en photo, choisis la marque, le type, l'état et le prix demandé : tu as tout de suite achète ou passe, avec la marge. Pour un avis plus fin (défauts, typicité, prix affiché), partage la photo dans le chat.</p></div></article>
       <article class="card step"><span class="n">4</span><div><h4>Réinvestis tout le premier mois</h4><p>Compte 80 à 150 € nets si tu vends bien. On ne se verse rien : on reconstitue le stock. Vers 300 € de côté, on peut commencer à regarder des petits lots de grossistes (onglet Offres, filtre ≤ 300 €, règle du 1/3 cochée).</p></div></article>
       <article class="card step"><span class="n">5</span><div><h4>Cadre légal, à faire toi-même</h4><p>Micro-entreprise vente de marchandises (cotisations d'environ 13,4 % du chiffre d'affaires), déclaration en préfecture (CERFA 11733) et registre des objets mobiliers si tu achètes d'occasion pour revendre. Rien n'est créé à ta place, et aucun compte n'est ouvert pour toi.</p></div></article>
@@ -163,6 +171,7 @@
 
   <!-- ===== STOCK ===== -->
   <section class="tab" id="t-stock" data-tab="stock">
+    <div id="weekendBanner" class="card weekend" hidden></div>
     <div class="hero card glow">
       <div class="hero-l">
         <label>Bénéfice cumulé (vendu)</label>
@@ -205,8 +214,8 @@
   <!-- ===== PHOTO ===== -->
   <section class="tab" id="t-photo" data-tab="photo">
     <div class="card">
-      <div class="card-h"><h2>Avis achète ou passe</h2></div>
-      <p class="note">Prends la pièce en photo, indique la marque, le type, l'état et le prix demandé. Le verdict utilise les prix de revente Revendor et la même formule de marge — sans envoyer la photo à un service. Pour un avis détaillé (étiquette, défauts, côte exacte), partage-la ensuite dans le chat.</p>
+      <div class="card-h"><h2>Achat éclair</h2></div>
+      <p class="note">Trois infos suffisent : marque, type, état (le prix demandé est optionnel). Le verdict OUI ou NON s'affiche tout de suite, avec le prix d'achat max et la marge — d'après le baromètre Revendor, sans envoyer la photo nulle part. La photo sert d'aperçu ; pour un avis sur l'étiquette, les défauts ou la côte exacte, partage-la ensuite dans le chat (pas d'analyse IA dans le site).</p>
       <label class="shot" id="shotBox">
         <input type="file" id="pFile" accept="image/*" capture="environment" hidden>
         <div id="pEmpty" class="shot-empty">
@@ -239,9 +248,9 @@
       </div>
       <div id="pOut" class="verdict"></div>
       <div class="row-btns">
-        <button type="button" class="btn" id="pShare" disabled>Partager la photo pour un avis détaillé</button>
+        <button type="button" class="btn" id="pShare" disabled>Partager photo + résumé</button>
       </div>
-      <p class="note" id="pShareHelp">Le bouton ouvre le menu de partage de ton téléphone (Messages, WhatsApp, Fichiers…). Envoie ensuite la photo dans notre chat pour que je la regarde.</p>
+      <p class="note" id="pShareHelp">Le bouton ouvre le menu de partage de ton téléphone (Messages, WhatsApp, Fichiers…). Envoie ensuite la photo et le résumé dans notre chat pour un avis visuel.</p>
     </div>
   </section>
 </main>
@@ -249,8 +258,8 @@
 <datalist id="brandList"></datalist>
 
 <nav class="tabs" id="tabs">
-  <button data-t="marques" class="on"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 6.6H21l-5.4 4 2.1 6.4L12 16.8 6.3 20l2.1-6.4L3 9.6h6.8z"/></svg><span>Marques</span></button>
-  <button data-t="offres"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Offres</span></button>
+  <button data-t="offres" class="on"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>Offres</span></button>
+  <button data-t="marques"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 6.6H21l-5.4 4 2.1 6.4L12 16.8 6.3 20l2.1-6.4L3 9.6h6.8z"/></svg><span>Marques</span></button>
   <button data-t="plan"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 10h8M8 14h5"/></svg><span>Plan</span></button>
   <button data-t="calcul"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h3M13 12h3M8 16h3M13 16h3"/></svg><span>Calcul</span></button>
   <button data-t="stock"><svg viewBox="0 0 24 24"><path d="M4 7h16l-1.5 13h-13z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/></svg><span>Stock</span></button>

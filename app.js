@@ -1,6 +1,9 @@
 /* Sourcing Vinted — application locale, pas de clé d'API, rien n'est envoyé. */
 const TZ = "Europe/Zurich";
 const STOCK_KEY = "sourcing-stock-v1";
+const SEEN_KEY = "sourcing-alert-seen-v1";
+const WEEKEND_NOTIF_KEY = "sourcing-weekend-notif";
+const SEEN_CACHE_PATH = "./__seen_alerts__";
 const euro = n => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(Number(n) || 0);
 const eur0 = n => euro(n).replace(/\s/g, "\u00a0");
 const fmtDate = iso => {
@@ -119,29 +122,86 @@ function populateFilters() {
   br.innerHTML = `<option value="">Toutes</option>` + brands.map(s => `<option>${esc(s)}</option>`).join("");
 }
 
+function genderMix() {
+  const g = DATA?.gender_mix || {};
+  const femme = Number(g.femme);
+  return { femme: femme > 0 && femme < 1 ? femme : 0.8, homme: 1 - (femme > 0 && femme < 1 ? femme : 0.8) };
+}
+
+function prioritySort(a, b) {
+  const pa = a.priority_brand ? 0 : 1;
+  const pb = b.priority_brand ? 0 : 1;
+  if (pa !== pb) return pa - pb;
+  const sa = b.brand_sales || 0;
+  const sb = a.brand_sales || 0;
+  if (sa !== sb) return sa - sb;
+  return (b.score - a.score) || (b.margin.net - a.margin.net);
+}
+
+function balanceGender(list) {
+  const { femme: femmeShare, homme: hommeShare } = genderMix();
+  const f = list.filter(o => o.gender === "femme");
+  const h = list.filter(o => o.gender === "homme");
+  const m = list.filter(o => o.gender !== "femme" && o.gender !== "homme");
+  const takeF = f.length;
+  const takeH = takeF ? Math.min(h.length, Math.max(0, Math.round(takeF * hommeShare / femmeShare))) : h.length;
+  const F = f.slice(0, takeF), H = h.slice(0, takeH);
+  const stepF = Math.max(1, Math.round(femmeShare / Math.max(hommeShare, 0.01)));
+  const out = [];
+  let i = 0, j = 0;
+  while (i < F.length || j < H.length) {
+    for (let k = 0; k < stepF && i < F.length; k++) out.push(F[i++]);
+    if (j < H.length) out.push(H[j++]);
+  }
+  if (!m.length) return out;
+  const mixteRe = /homme\s*(et|-|\/|,)\s*femme|femme\s*(et|-|\/|,)\s*homme|unisexe|unisex|\bmixte\b|homme\s*-\s*femme|femme\s*-\s*homme/i;
+  const explicit = m.filter(o => mixteRe.test(o.title || ""));
+  const other = m.filter(o => !mixteRe.test(o.title || ""));
+  const cap = Math.max(explicit.length, Math.round(0.25 * Math.max(1, out.length)));
+  const M = explicit.concat(other).slice(0, cap);
+  const mixed = [];
+  const stride = Math.max(1, Math.floor(out.length / Math.max(1, M.length)));
+  let mi = 0;
+  out.forEach((o, k) => {
+    mixed.push(o);
+    if (mi < M.length && (k + 1) % stride === 0) mixed.push(M[mi++]);
+  });
+  return mixed.concat(M.slice(mi));
+}
+
 function filteredOffers() {
   const budget = Number($("#fBudget").value);
   const src = $("#fSource").value;
   const brand = $("#fBrand").value;
+  const gender = $("#fGender") ? $("#fGender").value : "";
   const sort = $("#fSort").value;
   let list = (DATA.offers || []).slice();
   if (budget) list = list.filter(o => o.total_price <= budget);
   if (src) list = list.filter(o => o.source === src);
   if (brand) list = list.filter(o => o.brands.includes(brand));
+  if (gender === "femme") list = list.filter(o => o.gender === "femme" || o.gender === "mixte");
+  if (gender === "homme") list = list.filter(o => o.gender === "homme" || o.gender === "mixte");
   if (flagMode === "net") list = list.filter(o => o.margin.net > 0);
   if (flagMode === "third") list = list.filter(o => o.margin.rule_one_third_ok);
   list.sort((a, b) => {
     if (sort === "net") return b.margin.net - a.margin.net;
     if (sort === "total") return a.total_price - b.total_price;
     if (sort === "sales") return (b.brand_sales || 0) - (a.brand_sales || 0);
-    return (b.score - a.score) || (b.margin.net - a.margin.net);
+    return prioritySort(a, b);
   });
+  if (!gender) list = balanceGender(list);
   return list;
 }
 
 function renderOffers() {
   const list = filteredOffers();
-  $("#offCount").textContent = list.length + " offre" + (list.length > 1 ? "s" : "");
+  const nf = list.filter(o => o.gender === "femme").length;
+  const nh = list.filter(o => o.gender === "homme").length;
+  const nm = list.filter(o => o.gender === "mixte").length;
+  const nNew = list.filter(o => o.is_new).length;
+  $("#offCount").textContent = list.length + " offre" + (list.length > 1 ? "s" : "")
+    + (list.length ? ` · ${nf} femme / ${nh} homme / ${nm} mixte` : "")
+    + (nNew ? ` · ${nNew} nouvelle${nNew > 1 ? "s" : ""}` : "");
   if (!list.length) {
     $("#offers").innerHTML = `<div class="card"><p class="note" style="margin:0">Aucune offre avec ces filtres. Avec 100 €, élargis à « Tous les prix » pour voir les lots, ou garde le cap friperie (onglet Plan).</p></div>`;
     return;
@@ -149,9 +209,14 @@ function renderOffers() {
   $("#offers").innerHTML = list.map((o, i) => {
     const m = o.margin;
     const netCls = m.net > 0 ? "pos" : "neg";
+    const g = o.gender === "femme" ? "Femme" : o.gender === "homme" ? "Homme" : "Mixte";
+    const gCls = o.gender === "femme" ? "femme" : o.gender === "homme" ? "homme" : "mixte";
     const tags = [
+      `<span class="tag ${gCls}">${g}</span>`,
+      o.is_new ? `<span class="tag new">Nouveau</span>` : "",
       `<span class="tag">score ${o.score}</span>`,
       m.rule_one_third_ok ? `<span class="tag ok">1/3 ok</span>` : `<span class="tag bad">hors 1/3</span>`,
+      o.priority_brand ? "" : `<span class="tag">hors liste</span>`,
       o.pieces_estimated ? `<span class="tag warn">pièces estimées</span>` : "",
       /ESTIMATION/i.test(o.shipping_note || "") && o.shipping ? `<span class="tag warn">port estimé</span>` : ""
     ].join("");
@@ -175,7 +240,7 @@ function openOffer(o) {
   const body = $("#sheetBody");
   body.innerHTML = `
     <h3>${esc(o.title)}</h3>
-    <p class="muted">${esc(o.source)} · ${esc((o.brands || []).join(", "))}</p>
+    <p class="muted">${esc(o.source)} · ${esc((o.brands || []).join(", "))} · ${esc(o.gender === "femme" ? "Femme" : o.gender === "homme" ? "Homme" : "Mixte")}${o.is_new ? " · Nouveau" : ""}</p>
     <div class="kv" style="margin:14px 0">
       <span>Prix + port</span><b>${eur0(o.total_price)}</b>
       <span>dont port</span><b>${eur0(o.shipping)} ${o.shipping_note ? "· " + esc(o.shipping_note) : ""}</b>
@@ -201,7 +266,7 @@ function renderManuals() {
   $("#manuals").innerHTML = links.map(l => `
     <article class="item">
       <div class="t">${esc(l.query)}</div>
-      <div class="v"></div>
+      <div class="v">${l.gender ? `<span class="tag ${l.gender === "femme" ? "femme" : l.gender === "homme" ? "homme" : "mixte"}">${l.gender === "femme" ? "Femme" : l.gender === "homme" ? "Homme" : "Mixte"}</span>` : ""}</div>
       <div class="s full">
         <a href="${esc(l.vinted)}" target="_blank" rel="noopener">Vinted</a> ·
         <a href="${esc(l.leboncoin)}" target="_blank" rel="noopener">Leboncoin</a> ·
@@ -276,7 +341,71 @@ function itemNet(it) {
   return round2(resale - cost - pack - urssaf);
 }
 
+function daysBetween(a, b) {
+  const da = new Date(a + "T12:00:00"), db = new Date(b + "T12:00:00");
+  if (Number.isNaN(da.getTime()) || Number.isNaN(db.getTime())) return null;
+  return Math.round((db - da) / 86400000);
+}
+
+function zurichNowParts() {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, weekday: "short", hour: "2-digit", hour12: false }).formatToParts(new Date());
+  const wd = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[parts.find(p => p.type === "weekday").value];
+  const hour = Number(parts.find(p => p.type === "hour").value) % 24;
+  return { wd, hour };
+}
+
+function isWeekendWindow() {
+  const { wd, hour } = zurichNowParts();
+  return (wd === 5 && hour >= 17) || wd === 6 || wd === 0;
+}
+
+function weekendItems() {
+  const today = todayISO();
+  const items = (loadStock().items || []).filter(i => i.statut !== "vendu");
+  return items.map(it => {
+    const ref = it.date_mise_en_ligne || it.date_achat || today;
+    const days = daysBetween(ref, today) ?? 0;
+    const listed = it.statut === "en ligne" && it.date_mise_en_ligne;
+    const price = Number(it.prix_affiche) || 0;
+    let hint = "";
+    if (listed && days >= 30) hint = price ? `−20 % → ${eur0(price * 0.8)}` : "−20 % conseillé";
+    else if (listed && days >= 14) hint = price ? `−10 % → ${eur0(price * 0.9)}` : "−10 % conseillé";
+    else if (it.statut === "en stock") hint = "à mettre en ligne";
+    return { it, days, hint, cost: (Number(it.prix_achat) || 0) + (Number(it.port_achat) || 0) };
+  }).sort((a, b) => b.days - a.days);
+}
+
+function renderWeekendBanner() {
+  const box = $("#weekendBanner");
+  if (!box) return;
+  if (!isWeekendWindow()) { box.hidden = true; return; }
+  const rows = weekendItems();
+  if (!rows.length) { box.hidden = true; return; }
+  const cash = rows.reduce((s, r) => s + r.cost, 0);
+  box.hidden = false;
+  box.innerHTML = `
+    <div class="card-h"><h2>À vendre avant le week-end</h2><span class="muted">${rows.length} pièce${rows.length > 1 ? "s" : ""}</span></div>
+    <div class="bigish">${eur0(cash)} immobilisés</div>
+    <p class="note" style="margin:0">Somme des prix d'achat et du port des pièces non vendues. Les plus anciennes d'abord. Baisse suggérée : −10 % après 14 jours en ligne, −20 % après 30 jours.</p>
+    <ul class="weekend-list">${rows.slice(0, 12).map(r => `
+      <li><span>${esc(r.it.marque)} · ${esc(r.it.article)} <span class="muted">(${r.days} j · ${esc(r.it.statut)})</span></span><span class="hint">${esc(r.hint || eur0(r.cost))}</span></li>`).join("")}
+    </ul>`;
+}
+
+async function maybeWeekendNotification() {
+  if (!isWeekendWindow()) return;
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const key = todayISO();
+  if (localStorage.getItem(WEEKEND_NOTIF_KEY) === key) return;
+  const rows = weekendItems();
+  if (!rows.length) return;
+  const cash = rows.reduce((s, r) => s + r.cost, 0);
+  await notify("À vendre avant le week-end", `${rows.length} pièce${rows.length > 1 ? "s" : ""} non vendue${rows.length > 1 ? "s" : ""} · ${eur0(cash)} immobilisés`, "./#stock", "sourcing-weekend");
+  localStorage.setItem(WEEKEND_NOTIF_KEY, key);
+}
+
 function renderStock() {
+  renderWeekendBanner();
   const data = loadStock();
   const items = data.items || [];
   const sold = items.filter(i => i.statut === "vendu");
@@ -425,74 +554,95 @@ function importCsv(file) {
   reader.readAsText(file, "utf-8");
 }
 
-/* ---------- photo ---------- */
+/* ---------- photo / achat éclair ---------- */
+function maxBuyPrice(resale) {
+  const c = cfg();
+  const third = resale * (c.max_cost_ratio || 0.3334);
+  const breakEven = resale - (c.packaging_per_item || 0.4) - resale * (c.urssaf_rate || 0.134);
+  return round2(Math.max(0, Math.min(third, breakEven)));
+}
+
 function renderPhoto() {
   const brand = $("#pBrand").value;
   const type = $("#pType").value;
   const cond = $("#pCond").value;
-  const price = Number($("#pPrice").value);
+  const priceRaw = $("#pPrice").value;
+  const hasPrice = priceRaw !== "" && Number(priceRaw) >= 0;
+  const price = hasPrice ? Number(priceRaw) : null;
   const box = $("#pOut");
-  if (!brand || !($("#pPrice").value !== "" && price >= 0)) {
+  if (!brand) {
     box.className = "verdict";
-    box.innerHTML = `<p class="muted" style="margin:0">Indique au moins la marque et le prix demandé pour avoir le verdict.</p>`;
+    box.innerHTML = `<p class="muted" style="margin:0">Indique la marque (puis le type et l'état). Le prix demandé est optionnel : sans prix, tu vois déjà le prix d'achat max.</p>`;
+    $("#pShare").disabled = !photoFile && !brand;
     return;
   }
   const { resale, basis, brand: b } = resaleFor(brand, type, cond);
-  const m = netMargin(resale, price, { lot: false });
+  const maxBuy = maxBuyPrice(resale);
+  const mAsk = hasPrice ? netMargin(resale, price, { lot: false }) : null;
+  const mMax = netMargin(resale, maxBuy, { lot: false });
   const avoid = b && /éviter/i.test(b.brand);
   let cls, badge, tip;
   if (avoid) {
-    cls = "pass"; badge = "PASSE";
+    cls = "pass"; badge = "NON";
     tip = `${b.brand} se vend, mais trop bon marché : après emballage et URSSAF, la marge s'évapore. Cherche plutôt Ralph Lauren, Carhartt, The North Face, Patagonia, Lacoste ou Levi's.`;
-  } else if (m.rule_one_third_ok && m.net >= 2) {
-    cls = "buy"; badge = "ACHÈTE";
-    tip = `Revente de référence : ${eur0(resale)} (${basis}). À ${eur0(price)}, il resterait environ ${eur0(m.net)} nets après emballage et URSSAF.`;
-  } else if (m.net > 0) {
-    cls = "mid"; badge = "SERRÉ";
-    tip = `Revente de référence : ${eur0(resale)} (${basis}). La marge nette serait de ${eur0(m.net)}, mais le prix d'achat dépasse le tiers de la revente (ou la poche est trop juste). Négocie, ou passe.`;
+  } else if (!hasPrice) {
+    cls = "buy"; badge = "MAX";
+    tip = `Revente de référence : ${eur0(resale)} (${basis}). N'achète pas au-dessus de ${eur0(maxBuy)} (le plus bas entre un tiers de la revente et le prix qui reste à l'équilibre après emballage et URSSAF).`;
+  } else if (price <= maxBuy) {
+    cls = "buy"; badge = "OUI";
+    tip = `Revente de référence : ${eur0(resale)} (${basis}). À ${eur0(price)}, il resterait environ ${eur0(mAsk.net)} nets. Le plafond est ${eur0(maxBuy)}.`;
   } else {
-    cls = "pass"; badge = "PASSE";
-    tip = `Revente de référence : ${eur0(resale)} (${basis}). À ${eur0(price)}, après emballage et URSSAF tu serais à ${eur0(m.net)}. Ce n'est pas bon.`;
+    cls = "pass"; badge = "NON";
+    tip = `Revente de référence : ${eur0(resale)} (${basis}). À ${eur0(price)}, ${mAsk.net > 0 ? "la marge existe encore mais le prix dépasse le maximum conseillé" : "après emballage et URSSAF tu serais à " + eur0(mAsk.net)}. Plafond : ${eur0(maxBuy)}.`;
   }
   if (b && b.sales) tip += ` Volume observé : ${b.sales.toLocaleString("fr-FR")} ventes sur 12 mois, fourchette ${eur0(b.low)} – ${eur0(b.high)}.`;
-  box.className = "verdict " + cls;
+  box.className = "verdict flash " + cls;
   box.innerHTML = `
     <div class="badge">${badge}</div>
     <p>${esc(tip)}</p>
     <div class="nums">
-      <div><label>Revente médiane</label><b>${eur0(resale)}</b></div>
-      <div><label>Net estimé</label><b class="${m.net > 0 ? "pos" : "neg"}">${eur0(m.net)}</b></div>
-      <div><label>Achat / revente</label><b>${Math.round(m.cost_ratio * 100)} %</b></div>
+      <div class="max"><label>Prix d'achat max</label><b class="pos">${eur0(maxBuy)}</b></div>
+      <div><label>Revente estimée</label><b>${eur0(resale)}</b></div>
+      <div><label>Marge au prix max</label><b class="${mMax.net > 0 ? "pos" : "neg"}">${eur0(mMax.net)}</b></div>
+      ${hasPrice ? `<div><label>Marge au prix demandé</label><b class="${mAsk.net > 0 ? "pos" : "neg"}">${eur0(mAsk.net)}</b></div>
+      <div><label>Achat / revente</label><b>${Math.round(mAsk.cost_ratio * 100)} %</b></div>` : `<div><label>Règle du 1/3</label><b>${eur0(resale * cfg().max_cost_ratio)}</b></div>`}
     </div>
     <p class="note">L'outil ne « voit » pas la photo : il s'appuie sur ce que tu as indiqué. Pour un avis sur l'état réel, l'étiquette ou un défaut, partage la photo dans le chat.</p>`;
+  $("#pShare").disabled = !(photoFile || brand);
 }
 
 async function sharePhoto() {
-  if (!photoFile) return alert("Ajoute d'abord une photo.");
+  if (!photoFile && !$("#pBrand").value) return alert("Indique au moins la marque, et ajoute une photo si tu peux.");
   const brand = $("#pBrand").value || "marque ?";
   const price = $("#pPrice").value;
   const badge = ($("#pOut .badge") || {}).textContent || "";
-  const text = `Avis pièce Vinted — ${brand}, prix demandé ${price || "?"} €. Verdict automatique : ${badge || "à voir"}.`;
+  const maxEl = $("#pOut .nums .max b");
+  const maxTxt = maxEl ? maxEl.textContent : "";
+  const text = `Achat éclair Vinted — ${brand}, prix demandé ${price || "non indiqué"} €. Verdict : ${badge || "à voir"}. Prix d'achat max : ${maxTxt || "?"}.`;
   const file = photoFile;
+  const payload = { title: "Achat éclair Vinted", text };
   try {
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: "Avis pièce Vinted", text });
+    if (file && navigator.share && navigator.canShare && navigator.canShare({ files: [file], ...payload })) {
+      await navigator.share({ files: [file], ...payload });
       return;
     }
     if (navigator.share) {
-      await navigator.share({ title: "Avis pièce Vinted", text });
+      await navigator.share(payload);
+      return;
     }
   } catch (err) {
     if (err && err.name === "AbortError") return;
   }
   // repli : télécharger la photo + copier le texte
   try { await navigator.clipboard.writeText(text); } catch {}
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(file);
-  a.download = file.name || "piece-vinted.jpg";
-  a.click();
-  URL.revokeObjectURL(a.href);
-  alert("La photo a été enregistrée (ou proposée au téléchargement) et le résumé a été copié si possible. Envoie la photo dans notre chat pour un avis détaillé.");
+  if (file) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(file);
+    a.download = file.name || "piece-vinted.jpg";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  alert("Le résumé a été copié si possible" + (file ? ", et la photo a été enregistrée (ou proposée au téléchargement)" : "") + ". Envoie la photo dans notre chat pour un avis visuel.");
 }
 
 function onPhotoFile(file) {
@@ -588,6 +738,94 @@ function sky() {
   addEventListener("resize", resize, { passive: true });
 }
 
+/* ---------- alertes ---------- */
+function loadSeen() {
+  try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || "[]")); }
+  catch { return new Set(); }
+}
+function saveSeen(set) {
+  const arr = [...set].slice(-3000);
+  localStorage.setItem(SEEN_KEY, JSON.stringify(arr));
+  // Partage aussi la liste avec le service worker (Periodic Background Sync).
+  if ("caches" in window) {
+    caches.keys().then(keys => {
+      const k = keys.find(x => x.startsWith("sourcing-"));
+      if (!k) return;
+      return caches.open(k).then(c => c.put(SEEN_CACHE_PATH, new Response(JSON.stringify(arr), { headers: { "Content-Type": "application/json" } })));
+    }).catch(() => {});
+  }
+}
+
+async function notify(title, body, url, tag) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return false;
+  const opts = { body, icon: "icons/icon-192.png", badge: "icons/icon-192.png", tag: tag || "sourcing", data: { url: url || "./#offres" } };
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration();
+    if (reg && reg.showNotification) { await reg.showNotification(title, opts); return true; }
+  } catch {}
+  try { new Notification(title, opts); return true; } catch {}
+  return false;
+}
+
+function updateAlertBtn() {
+  const btn = $("#alertBtn");
+  if (!btn) return;
+  if (!("Notification" in window)) { btn.textContent = "Alertes indisponibles"; btn.disabled = true; return; }
+  const on = Notification.permission === "granted";
+  btn.classList.toggle("on", on);
+  btn.textContent = on ? "Alertes activées" : Notification.permission === "denied" ? "Alertes bloquées" : "Activer les alertes";
+}
+
+async function enableAlerts() {
+  if (!("Notification" in window)) return alert("Ce navigateur ne gère pas les notifications. Utilise Chrome sur Android, site installé.");
+  if (Notification.permission === "denied") {
+    return openSheetHtml("<h3>Alertes bloquées</h3><p>Dans Chrome : ⋮ → Paramètres → Paramètres des sites → Notifications, puis autorise ce site. Ou appuie sur le cadenas à gauche de l'adresse.</p>");
+  }
+  const perm = await Notification.requestPermission();
+  updateAlertBtn();
+  if (perm !== "granted") return;
+  try {
+    const reg = await navigator.serviceWorker?.ready;
+    if (reg && "periodicSync" in reg) {
+      const status = await navigator.permissions.query({ name: "periodic-background-sync" }).catch(() => null);
+      if (!status || status.state === "granted") {
+        await reg.periodicSync.register("sourcing-alerts", { minInterval: 12 * 60 * 60 * 1000 });
+      }
+    }
+  } catch {}
+  await notify("Alertes activées", "Tu seras prévenu à l'ouverture de l'appli quand de nouvelles offres correspondent à tes critères.", "./#offres", "sourcing-on");
+  checkAlerts(true);
+}
+
+async function checkAlerts(silentFirst = false) {
+  let data;
+  try {
+    const r = await fetch("data/alerts.json", { cache: "no-cache" });
+    if (!r.ok) return;
+    data = await r.json();
+  } catch { return; }
+  const offers = data.offers || [];
+  const seen = loadSeen();
+  const firstRun = !localStorage.getItem(SEEN_KEY);
+  const fresh = offers.filter(o => o.id && !seen.has(o.id));
+  // Marque aussi comme vues les offres déjà dans la liste principale (premier lancement).
+  if (firstRun && !silentFirst) {
+    (DATA?.offers || []).forEach(o => { if (o.id && !o.is_new) seen.add(o.id); });
+  }
+  if (fresh.length && Notification?.permission === "granted") {
+    const top = fresh[0];
+    const net = top.margin ? `${eur0(top.margin.net)} nets/pc` : "";
+    await notify(
+      fresh.length === 1 ? "Nouvelle offre sourcing" : `${fresh.length} nouvelles offres sourcing`,
+      [top.title, net].filter(Boolean).join(" · ") + (fresh.length > 1 ? ` et ${fresh.length - 1} autre${fresh.length > 2 ? "s" : ""}` : ""),
+      "./#offres",
+      "sourcing-new-offers"
+    );
+  }
+  fresh.forEach(o => seen.add(o.id));
+  saveSeen(seen);
+}
+
 /* ---------- boot ---------- */
 async function boot() {
   sky();
@@ -618,13 +856,16 @@ async function boot() {
   renderStock();
   renderPhoto();
 
-  const tab = (location.hash || "#marques").replace("#", "");
-  if ($(`#t-${tab}`)) showTab(tab);
+  const tab = (location.hash || "#offres").replace("#", "");
+  showTab($(`#t-${tab}`) ? tab : "offres");
 
   if ("serviceWorker" in navigator) {
     try { await navigator.serviceWorker.register("sw.js"); } catch {}
   }
   showInstall();
+  updateAlertBtn();
+  checkAlerts();
+  maybeWeekendNotification();
 }
 
 $("#tabs").addEventListener("click", e => {
@@ -636,7 +877,7 @@ addEventListener("hashchange", () => {
   if ($(`#t-${id}`)) showTab(id);
 });
 
-["fBudget", "fSource", "fBrand", "fSort"].forEach(id => {
+["fBudget", "fSource", "fBrand", "fGender", "fSort"].forEach(id => {
   document.addEventListener("change", e => { if (e.target.id === id) renderOffers(); });
 });
 $("#fFlags").addEventListener("click", e => {
@@ -684,6 +925,13 @@ $("#installBtn").addEventListener("click", async () => {
   $("#installBar").hidden = true;
 });
 $("#installHelp").addEventListener("click", installHelp);
+$("#alertBtn").addEventListener("click", enableAlerts);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible" || !DATA) return;
+  checkAlerts();
+  renderWeekendBanner();
+  maybeWeekendNotification();
+});
 $("#installX").addEventListener("click", () => {
   sessionStorage.setItem("sourcing-hide-install", "1");
   $("#installBar").hidden = true;

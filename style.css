@@ -165,3 +165,24 @@ select option{background:#12101c;color:var(--ink)}
   .verdict .nums{grid-template-columns:1fr 1fr}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+.pill.alert-pill{all:unset;cursor:pointer;font:600 11px/1 var(--mono);padding:6px 9px;border-radius:99px;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--mute);white-space:nowrap}
+.pill.alert-pill.on{color:var(--mint);border-color:rgba(78,240,184,.4);background:rgba(78,240,184,.1)}
+.tag.femme{background:rgba(255,107,139,.14);color:var(--coral)}
+.tag.homme{background:rgba(62,224,240,.12);color:var(--cyan)}
+.tag.mixte{background:rgba(155,123,255,.14);color:var(--violet)}
+.tag.new{background:rgba(255,209,102,.18);color:var(--gold);letter-spacing:.04em}
+.card.weekend{background:rgba(255,138,76,.12);border-color:rgba(255,138,76,.35)}
+.card.weekend h2{color:var(--gold)}
+.card.weekend .bigish{font:800 22px/1.1 var(--mono);margin:4px 0 8px}
+.weekend-list{margin:8px 0 0;padding:0;list-style:none}
+.weekend-list li{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line);font-size:13px}
+.weekend-list .hint{color:var(--gold);font-family:var(--mono);font-size:11px;white-space:nowrap}
+.verdict.flash .badge{font-size:42px;letter-spacing:.12em;padding:10px 22px;margin:4px 0 12px}
+.verdict.flash .nums{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.verdict.flash .nums .max{grid-column:1/-1}
+.verdict.flash .nums .max b{font-size:28px}
+@media(max-width:720px){
+  .pills{max-width:58vw}
+  .pill.alert-pill{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+}

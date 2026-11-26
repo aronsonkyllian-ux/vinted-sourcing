@@ -1,21 +1,42 @@
 {
   "name": "Sourcing Vinted",
   "short_name": "Sourcing",
-  "description": "Marques, offres, marges et avis photo pour l'achat-revente sur Vinted.",
+  "description": "Offres, marques, marges, achat éclair et suivi de stock pour l'achat-revente sur Vinted.",
   "id": "./",
-  "start_url": "./?source=pwa",
+  "start_url": "./?source=pwa#offres",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "any",
   "background_color": "#07060d",
   "theme_color": "#07060d",
   "lang": "fr",
   "dir": "ltr",
-  "categories": ["business", "shopping"],
+  "categories": [
+    "business",
+    "shopping"
+  ],
   "icons": [
-    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
-    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
-    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
