@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-26T08:03+01:00",
+ "generated_at": "2026-11-26T08:14+01:00",
  "budget": 100,
  "assumptions": {
   "packaging_per_item": 0.4,
@@ -141,7 +141,7 @@
    "id": "be9200cfd440f64a",
    "score": 100,
    "first_seen": "2026-11-26T08:03+01:00",
-   "is_new": true,
+   "is_new": false,
    "matches_criteria": true
   },
   {
@@ -178,7 +178,7 @@
    "id": "f24bb80986f781ea",
    "score": 98,
    "first_seen": "2026-11-26T08:03+01:00",
-   "is_new": true,
+   "is_new": false,
    "matches_criteria": true
   },
   {
@@ -215,7 +215,7 @@
    "id": "4ec78327b1f4437d",
    "score": 97,
    "first_seen": "2026-11-26T08:03+01:00",
-   "is_new": true,
+   "is_new": false,
    "matches_criteria": true
   },
   {
@@ -252,7 +252,7 @@
    "id": "62ff6ffec606f883",
    "score": 100,
    "first_seen": "2026-11-26T08:03+01:00",
-   "is_new": true,
+   "is_new": false,
    "matches_criteria": true
   },
   {
@@ -289,7 +289,7 @@
    "id": "20dd65e84a9a1f80",
    "score": 100,
    "first_seen": "2026-11-26T08:03+01:00",
-   "is_new": true,
+   "is_new": false,
    "matches_criteria": true
   },
   {
@@ -325,7 +325,7 @@
    "id": "323a7deb9374d94f",
    "score": 85,
    "first_seen": "2026-11-26T08:03+01:00",
-   "is_new": true,
+   "is_new": false,
    "matches_criteria": true
   },
   {
@@ -435,7 +435,7 @@
    "id": "4eded5f1a804998f",
    "score": 100,
    "first_seen": "2026-11-26T08:03+01:00",
-   "is_new": true,
+   "is_new": false,
    "matches_criteria": true
   },
   {
@@ -473,7 +473,7 @@
    "id": "5b2fb8ce70ddffea",
    "score": 100,
    "first_seen": "2026-11-26T08:03+01:00",
-   "is_new": true,
+   "is_new": false,
    "matches_criteria": true
   },
   {
@@ -547,7 +547,7 @@
    "id": "b30135cdab17e59d",
    "score": 100,
    "first_seen": "2026-11-26T08:03+01:00",
-   "is_new": true,
+   "is_new": false,
    "matches_criteria": true
   },
   {
@@ -584,7 +584,7 @@
    "id": "f9596bbe914b16f8",
    "score": 98,
    "first_seen": "2026-11-26T08:03+01:00",
-   "is_new": true,
+   "is_new": false,
    "matches_criteria": true
   },
   {
@@ -693,7 +693,7 @@
    "id": "535a0d7916d3e414",
    "score": 100,
    "first_seen": "2026-11-26T08:03+01:00",
-   "is_new": true,
+   "is_new": false,
    "matches_criteria": true
   },
   {
@@ -1024,7 +1024,7 @@
    "id": "2aa4ac9471265aa9",
    "score": 27,
    "first_seen": "2026-11-26T08:03+01:00",
-   "is_new": true,
+   "is_new": false,
    "matches_criteria": true
   },
   {
