@@ -128,14 +128,21 @@ function genderMix() {
   return { femme: femme > 0 && femme < 1 ? femme : 0.8, homme: 1 - (femme > 0 && femme < 1 ? femme : 0.8) };
 }
 
+function minNet() {
+  const q = DATA?.offer_quality || DATA?.other_brand_keep || {};
+  const n = Number(q.min_net_per_piece);
+  return Number.isFinite(n) ? n : 5;
+}
+
 function prioritySort(a, b) {
   const pa = a.priority_brand ? 0 : 1;
   const pb = b.priority_brand ? 0 : 1;
   if (pa !== pb) return pa - pb;
-  const sa = b.brand_sales || 0;
-  const sb = a.brand_sales || 0;
-  if (sa !== sb) return sa - sb;
-  return (b.score - a.score) || (b.margin.net - a.margin.net);
+  const na = b.margin.net - a.margin.net;
+  if (na !== 0) return na;
+  const ra = (a.margin.cost_ratio || 9) - (b.margin.cost_ratio || 9);
+  if (ra !== 0) return ra;
+  return (b.score - a.score) || ((b.brand_sales || 0) - (a.brand_sales || 0));
 }
 
 function balanceGender(list) {
@@ -143,6 +150,7 @@ function balanceGender(list) {
   const f = list.filter(o => o.gender === "femme");
   const h = list.filter(o => o.gender === "homme");
   const m = list.filter(o => o.gender !== "femme" && o.gender !== "homme");
+  if (!f.length && !h.length) return m;
   const takeF = f.length;
   const takeH = takeF ? Math.min(h.length, Math.max(0, Math.round(takeF * hommeShare / femmeShare))) : h.length;
   const F = f.slice(0, takeF), H = h.slice(0, takeH);
@@ -181,6 +189,7 @@ function filteredOffers() {
   if (brand) list = list.filter(o => o.brands.includes(brand));
   if (gender === "femme") list = list.filter(o => o.gender === "femme" || o.gender === "mixte");
   if (gender === "homme") list = list.filter(o => o.gender === "homme" || o.gender === "mixte");
+  list = list.filter(o => o.margin.rule_one_third_ok && o.margin.net >= minNet());
   if (flagMode === "net") list = list.filter(o => o.margin.net > 0);
   if (flagMode === "third") list = list.filter(o => o.margin.rule_one_third_ok);
   list.sort((a, b) => {
@@ -215,7 +224,7 @@ function renderOffers() {
       `<span class="tag ${gCls}">${g}</span>`,
       o.is_new ? `<span class="tag new">Nouveau</span>` : "",
       `<span class="tag">score ${o.score}</span>`,
-      m.rule_one_third_ok ? `<span class="tag ok">1/3 ok</span>` : `<span class="tag bad">hors 1/3</span>`,
+      `<span class="tag ok">1/3 ok</span>`,
       o.priority_brand ? "" : `<span class="tag">hors liste</span>`,
       o.pieces_estimated ? `<span class="tag warn">pièces estimées</span>` : "",
       /ESTIMATION/i.test(o.shipping_note || "") && o.shipping ? `<span class="tag warn">port estimé</span>` : ""
