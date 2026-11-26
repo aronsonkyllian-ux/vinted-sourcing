@@ -1,23 +1,259 @@
 {
   "source": "https://revendor.app/fr/vinted-sales-barometer",
-  "source_note": "Baromètre Revendor : 50 087 ventes Vinted réelles sur 12 mois (513 comptes, surtout revendeurs fripe/vintage en France). Prix payé au vendeur, article seul, hors frais acheteur. Fourchette = quart le moins cher au quart le plus cher. Relevé le 25/11/2026.",
+  "source_note": "Baromètre Revendor : 50 087 ventes Vinted réelles sur 12 mois (513 comptes, surtout revendeurs fripe/vintage en France). Prix payé au vendeur, article seul, hors frais acheteur. Fourchette = quart le moins cher au quart le plus cher. Relevé le 25/11/2026. Liste complétée le 26/11/2026 à partir du même baromètre : Japan Style, Sézane, Under Armour, Sandro, Ba&sh, Maje, Puma. Clés de recherche ajoutées pour Uniqlo et Polo Ralph Lauren. Marques demandées mais absentes du baromètre (aucun chiffre inventé, donc non ajoutées) : Zadig & Voltaire, Isabel Marant, Diesel, Guess, Desigual, Cos, Weekday, The Kooples. Pokémon écarté (cartes / merch, pas du textile).",
   "brands": [
-    {"brand": "Ralph Lauren", "keys": ["ralph lauren", "ralph", "lauren"], "median": 23.20, "low": 15.00, "high": 32.80, "sales": 1665},
-    {"brand": "Nike", "keys": ["nike"], "median": 15.00, "low": 10.00, "high": 29.00, "sales": 1405},
-    {"brand": "adidas", "keys": ["adidas"], "median": 20.00, "low": 11.21, "high": 32.00, "sales": 1362},
-    {"brand": "Levi's", "keys": ["levi's", "levis", "levi’s", "levi"], "median": 17.00, "low": 12.00, "high": 25.00, "sales": 1353},
-    {"brand": "Tommy Hilfiger", "keys": ["tommy hilfiger", "tommy"], "median": 18.00, "low": 12.00, "high": 27.00, "sales": 1174},
-    {"brand": "Lacoste", "keys": ["lacoste", "croco"], "median": 20.00, "low": 14.00, "high": 28.00, "sales": 715},
-    {"brand": "Carhartt", "keys": ["carhartt"], "median": 27.00, "low": 15.00, "high": 50.00, "sales": 441},
-    {"brand": "The North Face", "keys": ["the north face", "north face", "tnf"], "median": 22.00, "low": 16.05, "high": 35.00, "sales": 414},
-    {"brand": "Columbia", "keys": ["columbia", "colombia"], "median": 17.00, "low": 12.50, "high": 25.00, "sales": 369},
-    {"brand": "Patagonia", "keys": ["patagonia"], "median": 38.35, "low": 30.00, "high": 49.00, "sales": 356},
-    {"brand": "K-Way", "keys": ["k-way", "kway"], "median": 63.00, "low": 50.00, "high": 81.50, "sales": 203},
-    {"brand": "Burberry", "keys": ["burberry"], "median": 33.00, "low": 25.00, "high": 50.00, "sales": 151},
-    {"brand": "Dickies", "keys": ["dickies"], "median": 15.00, "low": 10.00, "high": 19.00, "sales": 141},
-    {"brand": "Polo Ralph Lauren", "keys": [], "median": 25.00, "low": 16.00, "high": 39.00, "sales": 195},
-    {"brand": "Uniqlo", "keys": [], "median": 18.50, "low": 10.00, "high": 38.75, "sales": 254},
-    {"brand": "Zara (à éviter)", "keys": [], "median": 9.50, "low": 5.00, "high": 16.50, "sales": 443},
-    {"brand": "H&M (à éviter)", "keys": [], "median": 6.00, "low": 4.00, "high": 9.99, "sales": 156}
+    {
+      "brand": "Ralph Lauren",
+      "keys": [
+        "ralph lauren",
+        "ralph",
+        "lauren"
+      ],
+      "median": 23.2,
+      "low": 15.0,
+      "high": 32.8,
+      "sales": 1665
+    },
+    {
+      "brand": "Nike",
+      "keys": [
+        "nike"
+      ],
+      "median": 15.0,
+      "low": 10.0,
+      "high": 29.0,
+      "sales": 1405
+    },
+    {
+      "brand": "adidas",
+      "keys": [
+        "adidas"
+      ],
+      "median": 20.0,
+      "low": 11.21,
+      "high": 32.0,
+      "sales": 1362
+    },
+    {
+      "brand": "Levi's",
+      "keys": [
+        "levi's",
+        "levis",
+        "levi’s",
+        "levi"
+      ],
+      "median": 17.0,
+      "low": 12.0,
+      "high": 25.0,
+      "sales": 1353
+    },
+    {
+      "brand": "Tommy Hilfiger",
+      "keys": [
+        "tommy hilfiger",
+        "tommy"
+      ],
+      "median": 18.0,
+      "low": 12.0,
+      "high": 27.0,
+      "sales": 1174
+    },
+    {
+      "brand": "Lacoste",
+      "keys": [
+        "lacoste",
+        "croco"
+      ],
+      "median": 20.0,
+      "low": 14.0,
+      "high": 28.0,
+      "sales": 715
+    },
+    {
+      "brand": "Carhartt",
+      "keys": [
+        "carhartt"
+      ],
+      "median": 27.0,
+      "low": 15.0,
+      "high": 50.0,
+      "sales": 441
+    },
+    {
+      "brand": "The North Face",
+      "keys": [
+        "the north face",
+        "north face",
+        "tnf"
+      ],
+      "median": 22.0,
+      "low": 16.05,
+      "high": 35.0,
+      "sales": 414
+    },
+    {
+      "brand": "Columbia",
+      "keys": [
+        "columbia",
+        "colombia"
+      ],
+      "median": 17.0,
+      "low": 12.5,
+      "high": 25.0,
+      "sales": 369
+    },
+    {
+      "brand": "Patagonia",
+      "keys": [
+        "patagonia"
+      ],
+      "median": 38.35,
+      "low": 30.0,
+      "high": 49.0,
+      "sales": 356
+    },
+    {
+      "brand": "K-Way",
+      "keys": [
+        "k-way",
+        "kway"
+      ],
+      "median": 63.0,
+      "low": 50.0,
+      "high": 81.5,
+      "sales": 203
+    },
+    {
+      "brand": "Burberry",
+      "keys": [
+        "burberry"
+      ],
+      "median": 33.0,
+      "low": 25.0,
+      "high": 50.0,
+      "sales": 151
+    },
+    {
+      "brand": "Dickies",
+      "keys": [
+        "dickies"
+      ],
+      "median": 15.0,
+      "low": 10.0,
+      "high": 19.0,
+      "sales": 141
+    },
+    {
+      "brand": "Polo Ralph Lauren",
+      "keys": [
+        "polo ralph lauren"
+      ],
+      "median": 25.0,
+      "low": 16.0,
+      "high": 39.0,
+      "sales": 195
+    },
+    {
+      "brand": "Uniqlo",
+      "keys": [
+        "uniqlo"
+      ],
+      "median": 18.5,
+      "low": 10.0,
+      "high": 38.75,
+      "sales": 254
+    },
+    {
+      "brand": "Japan Style",
+      "keys": [
+        "japan style",
+        "japanstyle"
+      ],
+      "median": 23.0,
+      "low": 17.0,
+      "high": 29.0,
+      "sales": 445
+    },
+    {
+      "brand": "Sézane",
+      "keys": [
+        "sézane",
+        "sezane"
+      ],
+      "median": 45.0,
+      "low": 34.0,
+      "high": 60.0,
+      "sales": 340
+    },
+    {
+      "brand": "Under Armour",
+      "keys": [
+        "under armour",
+        "under armor",
+        "underarmour"
+      ],
+      "median": 10.0,
+      "low": 8.0,
+      "high": 13.0,
+      "sales": 214
+    },
+    {
+      "brand": "Sandro",
+      "keys": [
+        "sandro"
+      ],
+      "median": 45.0,
+      "low": 26.88,
+      "high": 75.0,
+      "sales": 204
+    },
+    {
+      "brand": "Ba&sh",
+      "keys": [
+        "ba&sh",
+        "ba & sh",
+        "ba sh"
+      ],
+      "median": 40.0,
+      "low": 30.0,
+      "high": 60.0,
+      "sales": 169
+    },
+    {
+      "brand": "Maje",
+      "keys": [
+        "maje"
+      ],
+      "median": 45.0,
+      "low": 27.25,
+      "high": 71.0,
+      "sales": 159
+    },
+    {
+      "brand": "Puma",
+      "keys": [
+        "puma"
+      ],
+      "median": 15.0,
+      "low": 8.0,
+      "high": 25.0,
+      "sales": 138
+    },
+    {
+      "brand": "Zara (à éviter)",
+      "keys": [],
+      "median": 9.5,
+      "low": 5.0,
+      "high": 16.5,
+      "sales": 443
+    },
+    {
+      "brand": "H&M (à éviter)",
+      "keys": [],
+      "median": 6.0,
+      "low": 4.0,
+      "high": 9.99,
+      "sales": 156
+    }
   ]
 }
